@@ -1,0 +1,17 @@
+*.iml
+target/
+bin/
+logs/
+.gradle
+.DS_Store
+build/
+.idea/
+.idea-build/
+.classpath
+.project
+.settings/
+.springBeans
+test-output/
+.apt_generated/
+.factorypath
+

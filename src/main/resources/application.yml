@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    active: local
+
+---
+ 
+spring:
+  profiles: local
+  application:
+    name: Demo web app
+
+server:
+  port: 5002
+  
+logging:
+  config: classpath:log4j2.xml
+  level:
+    org.springframework.cloud.sleuth: DEBUG
+
+# Actuator endpoint management
+management:
+  endpoints:
+    web:
+      base-path: /manage
+      exposure:
+        include: shutdown,loggers,health,info,metrics
+  endpoint:
+    shutdown:
+      enabled: true
+      

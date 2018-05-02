@@ -2,17 +2,22 @@ package com.demo;
 
 import com.google.common.collect.MapMaker;
 
+import java.time.Duration;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import brave.Tracing;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,6 +30,9 @@ public class UserApiHandler {
     private static final Logger logger = LoggerFactory.getLogger(UserApiHandler.class);
     
     public static final String CLASS_NAME = UserApiHandler.class.getCanonicalName();
+    
+    @Autowired
+    private ApplicationContext applicationContext;
     
     private static final ConcurrentMap<String, User> kvStore = new MapMaker()
             .concurrencyLevel(Runtime.getRuntime().availableProcessors()) // # of concurrent segments = available threads
@@ -66,8 +74,11 @@ public class UserApiHandler {
     public Mono<ServerResponse> getById(final ServerRequest request) {
         final String userId = request.pathVariables().get("id");
         
-        return fetchUser(userId)
+        logger.info("Beans of type 'brave.Tracing': {}", applicationContext.getBeansOfType(Tracing.class));
+        
+        return FETCH_USER_BY_ID.apply(userId)
                 .doOnError(t -> logger.info("Exception while fetching user with id '{}'", userId, t))
+                .doOnSuccess(user -> logger.info("Successfully fetched user '{}'.", user))
                 .flatMap(user -> ServerResponse
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -86,6 +97,22 @@ public class UserApiHandler {
             return Mono.error(new RuntimeException("User with ID " + id + " was not found."));
         }
         
-        return Mono.just(user);
+        return Mono.just(user).delaySubscription(Duration.ofMillis(1000))
+                .doOnNext(u -> logger.info("[#fetchUser] Fetched a user --> {}", u));
     }
+    
+    public static final Function<String, Mono<User>> FETCH_USER_BY_ID = userId -> {
+        // Simulate exception
+        if (StringUtils.equals(userId, "U-1")) {
+            return Mono.error(new RuntimeException("Throwing RuntimeException"));
+        }
+
+        final User user = kvStore.get(userId);
+        if (user == null) {
+            return Mono.error(new RuntimeException("User with ID " + userId + " was not found."));
+        }
+
+        return Mono.just(user).delaySubscription(Duration.ofMillis(1000))
+                .doOnNext(u -> logger.info("[#fetchUser] Fetched a user --> {}", u));
+    };
 }

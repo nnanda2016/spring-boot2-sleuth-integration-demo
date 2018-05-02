@@ -62,8 +62,18 @@ ext {
 	log4j2_version = "2.10.0"
 	lmax_disruptor_version = "3.3.7"
 	
+	// Tracing related
+	zipkin_brave_log4j2_version = "4.19.1"
+	spring_cloud_release_train_version = "Finchley.RC1"
+	
 	// For unit testing
 	testng_version = "6.14.2"
+}
+
+dependencyManagement {
+	imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_release_train_version}"
+    }
 }
 
 dependencies {
@@ -73,7 +83,8 @@ dependencies {
 	compile "org.springframework.boot:spring-boot-starter-webflux"
 	compile "org.springframework.boot:spring-boot-starter-hateoas"
 	compile "org.springframework.boot:spring-boot-starter-log4j2"
-	compile "org.springframework.cloud:spring-cloud-starter-sleuth:2.0.0.M9"
+	compile "org.springframework.cloud:spring-cloud-starter-sleuth"
+	compile "org.springframework.cloud:spring-cloud-starter-zipkin"
 	
 	//compileOnly "org.springframework.boot:spring-boot-configuration-processor"
 	
@@ -93,6 +104,8 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2_version}"
     compile "com.lmax:disruptor:${lmax_disruptor_version}"
 	
+	// Tracing
+	compile "io.zipkin.brave:brave-context-log4j2:${zipkin_brave_log4j2_version}"
 	
 	// Unit tests
 	testCompile "org.springframework.boot:spring-boot-starter-test"

@@ -1,5 +1,7 @@
 package com.demo;
 
+import com.demo.exception.AppException;
+import com.demo.exception.DemoErrorAttributes;
 import com.google.common.collect.MapMaker;
 
 import java.time.Duration;
@@ -92,9 +94,13 @@ public class UserApiHandler {
             return Mono.error(new RuntimeException("Throwing RuntimeException"));
         } 
         
+        if (StringUtils.equals(id, "U-100")) {
+            return Mono.error(new AppException(DemoErrorAttributes.DEFAULT_ERROR_CODE, DemoErrorAttributes.DEFAULT_ERROR_MESSAGE));
+        }
+        
         final User user = kvStore.get(id);
         if (user == null) {
-            return Mono.error(new RuntimeException("User with ID " + id + " was not found."));
+            return Mono.error(new AppException("APP-404001", "User with ID '" + id + "' was not found." ));
         }
         
         return Mono.just(user).delaySubscription(Duration.ofMillis(1000))
@@ -104,14 +110,19 @@ public class UserApiHandler {
     public static final Function<String, Mono<User>> FETCH_USER_BY_ID = userId -> {
         // Simulate exception
         if (StringUtils.equals(userId, "U-1")) {
-            return Mono.error(new RuntimeException("Throwing RuntimeException"));
+            return Mono.error(new RuntimeException("User with id 'U-1' was not found."));
+        }
+        
+        if (StringUtils.equals(userId, "U-100")) {
+            return Mono.error(new AppException(DemoErrorAttributes.DEFAULT_ERROR_CODE, DemoErrorAttributes.DEFAULT_ERROR_MESSAGE));
         }
 
         final User user = kvStore.get(userId);
         if (user == null) {
-            return Mono.error(new RuntimeException("User with ID " + userId + " was not found."));
+            return Mono.error(new AppException("APP-404001", "User with ID '" + userId + "' was not found." ));
         }
 
+        // Delay is intentional. 
         return Mono.just(user).delaySubscription(Duration.ofMillis(1000))
                 .doOnNext(u -> logger.info("[#fetchUser] Fetched a user --> {}", u));
     };

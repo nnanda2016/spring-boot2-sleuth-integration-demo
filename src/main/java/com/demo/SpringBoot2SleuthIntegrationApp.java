@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import brave.Tracing;
 import brave.context.log4j2.ThreadContextCurrentTraceContext;
+import brave.propagation.CurrentTraceContext;
 
 /**
  * TODO: Add a description
@@ -19,9 +19,7 @@ public class SpringBoot2SleuthIntegrationApp {
     }
     
     @Bean
-    public Tracing tracing() {
-        return Tracing.newBuilder()
-                .currentTraceContext(ThreadContextCurrentTraceContext.create())
-                .build();
+    public CurrentTraceContext currentTraceContext() {
+        return ThreadContextCurrentTraceContext.create();
     }
 }

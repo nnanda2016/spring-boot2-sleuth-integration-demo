@@ -63,8 +63,9 @@ ext {
 	lmax_disruptor_version = "3.3.7"
 	
 	// Tracing related
-	zipkin_brave_log4j2_version = "4.19.1"
+	//zipkin_brave_log4j2_version = "4.19.1"
 	spring_cloud_release_train_version = "Finchley.RC1"
+	brave_release_train_version = "4.19.2"
 	
 	// For unit testing
 	testng_version = "6.14.2"
@@ -72,6 +73,7 @@ ext {
 
 dependencyManagement {
 	imports {
+		mavenBom "io.zipkin.brave:brave-bom:${brave_release_train_version}"
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_release_train_version}"
     }
 }
@@ -105,7 +107,7 @@ dependencies {
     compile "com.lmax:disruptor:${lmax_disruptor_version}"
 	
 	// Tracing
-	compile "io.zipkin.brave:brave-context-log4j2:${zipkin_brave_log4j2_version}"
+	//compile "io.zipkin.brave:brave-context-log4j2:${zipkin_brave_log4j2_version}"
 	
 	// Unit tests
 	testCompile "org.springframework.boot:spring-boot-starter-test"

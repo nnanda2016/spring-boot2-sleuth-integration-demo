@@ -59,11 +59,11 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
 		errorPropertiesMap.remove(HttpStatus.class.getCanonicalName());
 		
 		final TraceContext traceContext = Tracing.current().currentTraceContext().get();
-        logger.info("[TraceId: {}][SpanId: {}]", traceContext.traceId(), traceContext.spanId());
+        logger.info("[TraceContext: {}]", traceContext);
 		
 		return ServerResponse.status(httpStatus)
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.header("X-TraceId", traceContext.traceIdString())
+//				.header("X-TraceId", traceContext.traceIdString())
 				.body(BodyInserters.fromObject(errorPropertiesMap));
 	}
 }

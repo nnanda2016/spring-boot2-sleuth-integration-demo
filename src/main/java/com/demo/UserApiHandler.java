@@ -20,6 +20,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import brave.Tracing;
+import brave.propagation.TraceContext;
 import reactor.core.publisher.Mono;
 
 /**
@@ -78,6 +79,9 @@ public class UserApiHandler {
         
         logger.info("Beans of type 'brave.Tracing': {}", applicationContext.getBeansOfType(Tracing.class));
         
+        final TraceContext traceContext = Tracing.current().currentTraceContext().get();
+        logger.info("[TraceId: {}][SpanId: {}]", traceContext.traceId(), traceContext.spanId());
+        
         return FETCH_USER_BY_ID.apply(userId)
                 .doOnError(t -> logger.info("Exception while fetching user with id '{}'", userId, t))
                 .doOnSuccess(user -> logger.info("Successfully fetched user '{}'.", user))
@@ -119,7 +123,7 @@ public class UserApiHandler {
 
         final User user = kvStore.get(userId);
         if (user == null) {
-            return Mono.error(new AppException("APP-404001", "User with ID '" + userId + "' was not found." ));
+            return Mono.error(new AppException("APP_404001", "User with ID '" + userId + "' was not found." ));
         }
 
         // Delay is intentional. 

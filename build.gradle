@@ -32,6 +32,7 @@ repositories {
 	mavenLocal()
 	mavenCentral()
 	maven { url "https://repo.spring.io/milestone" }
+	maven {url "https://repo.spring.io/libs-snapshot"}
 }
 
 configurations {
@@ -64,7 +65,7 @@ ext {
 	
 	// Tracing related
 	//zipkin_brave_log4j2_version = "4.19.1"
-	spring_cloud_release_train_version = "Finchley.RC1"
+	spring_cloud_release_train_version = "Finchley.BUILD-SNAPSHOT"
 	brave_release_train_version = "4.19.2"
 	
 	// For unit testing

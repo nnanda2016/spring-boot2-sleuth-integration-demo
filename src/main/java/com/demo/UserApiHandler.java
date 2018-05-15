@@ -95,7 +95,7 @@ public class UserApiHandler {
                 ;
     }
     
-//    @NewSpan(name="com.demo.UserApiHandler#fetchUser")
+    @NewSpan(name="com.demo.UserApiHandler#fetchUser")
     private Mono<User> fetchUser(final String id) {
         // Simulate exception
         if (StringUtils.equals(id, "U-1")) {

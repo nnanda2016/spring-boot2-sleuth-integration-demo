@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -73,7 +74,8 @@ public class UserApiHandler {
         user.setLastName("U5_Last");
         kvStore.put(user.getId(), user);
     }
-
+    
+    @NewSpan(name="com.demo.UserApiHandler#getbyId")
     public Mono<ServerResponse> getById(final ServerRequest request) {
         final String userId = request.pathVariables().get("id");
         
@@ -82,7 +84,8 @@ public class UserApiHandler {
         final TraceContext traceContext = Tracing.current().currentTraceContext().get();
         logger.info("[TraceId: {}][SpanId: {}]", traceContext.traceId(), traceContext.spanId());
         
-        return FETCH_USER_BY_ID.apply(userId)
+//        return FETCH_USER_BY_ID.apply(userId)
+        return fetchUser(userId)
                 .doOnError(t -> logger.info("Exception while fetching user with id '{}'", userId, t))
                 .doOnSuccess(user -> logger.info("Successfully fetched user '{}'.", user))
                 .flatMap(user -> ServerResponse
@@ -91,7 +94,8 @@ public class UserApiHandler {
                         .body(BodyInserters.fromObject(user)))
                 ;
     }
-
+    
+//    @NewSpan(name="com.demo.UserApiHandler#fetchUser")
     private Mono<User> fetchUser(final String id) {
         // Simulate exception
         if (StringUtils.equals(id, "U-1")) {
@@ -111,7 +115,7 @@ public class UserApiHandler {
                 .doOnNext(u -> logger.info("[#fetchUser] Fetched a user --> {}", u));
     }
     
-    public static final Function<String, Mono<User>> FETCH_USER_BY_ID = userId -> {
+    private static final Function<String, Mono<User>> FETCH_USER_BY_ID = userId -> {
         // Simulate exception
         if (StringUtils.equals(userId, "U-1")) {
             return Mono.error(new RuntimeException("User with id 'U-1' was not found."));
